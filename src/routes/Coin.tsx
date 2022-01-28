@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { useParams } from "react-router";
-import { useLocation, Routes, Route, Link, useMatch } from "react-router-dom";
+import {
+  useLocation,
+  useNavigate,
+  Routes,
+  Route,
+  Link,
+  useMatch,
+} from "react-router-dom";
 import { Helmet } from "react-helmet";
 import styled from "styled-components";
 import { fetchCoinInfo, fetchCoinTickers } from "./api";
 import Chart from "./Chart";
 import Price from "./Price";
-
-const Title = styled.h1`
-  font-size: 48px;
-  color: ${(props) => props.theme.accentColor};
-`;
 
 const Loader = styled.span`
   text-align: center;
@@ -29,6 +31,24 @@ const Header = styled.header`
   display: flex;
   justify-content: center;
   align-items: center;
+  position: relative;
+`;
+
+const BackBtn = styled.div`
+  top: 70%;
+  position: absolute;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+`;
+
+const Title = styled.h1`
+  font-size: 48px;
+  color: ${(props) => props.theme.accentColor};
 `;
 
 const Overview = styled.div`
@@ -95,7 +115,7 @@ interface IInfoData {
   last_data_at: string;
 }
 
-interface IPriceData {
+export interface IPriceData {
   id: string;
   name: string;
   symbol: string;
@@ -136,6 +156,7 @@ interface RouteState {
 function Coin() {
   const priceMatch = useMatch("/:coinId/price");
   const chartMatch = useMatch("/:coinId/chart");
+  const navigate = useNavigate();
   const { coinId } = useParams();
   const { state } = useLocation() as RouteState;
   const { isLoading: infoLoading, data: infoData } = useQuery<IInfoData>(
@@ -149,6 +170,9 @@ function Coin() {
       refetchInterval: 5000,
     }
   );
+  const goBack = () => {
+    navigate("/");
+  };
   const loading = infoLoading || tickersLoading;
   return (
     <Container>
@@ -158,6 +182,7 @@ function Coin() {
         </title>
       </Helmet>
       <Header>
+        <BackBtn onClick={goBack}>뒤로가기</BackBtn>
         <Title>
           {state?.name ? state.name : loading ? "Loading..." : infoData?.name}
         </Title>
@@ -197,7 +222,7 @@ function Coin() {
           </Tabs>
           <Routes>
             <Route path="chart" element={<Chart coinId={coinId!} />} />
-            <Route path="price" element={<Price />} />
+            <Route path="price" element={<Price coinId={coinId!} />} />
           </Routes>
         </>
       )}

@@ -22,17 +22,28 @@ const Chart = ({ coinId }: ChartProps) => {
   const { isLoading, data } = useQuery<IHistorical[]>(["ohlc", coinId], () =>
     fetchCoinHistory(coinId)
   );
+
+  // console.log(
+  //   data?.map((price) => [
+  //     new Date(price.time_open).getTime(),
+  //     [price.open, price.high, price.low, price.close],
+  //   ])
+  // );
+
   return (
     <div>
       {isLoading ? (
         "Loading chart..."
       ) : (
         <ApexChart
-          type="line"
+          type="candlestick"
           series={[
             {
-              name: "idontno",
-              data: data?.map((price) => price.close),
+              name: "price",
+              data: data?.map((price) => [
+                new Date(price.time_open).getTime(),
+                [price.open, price.high, price.low, price.close],
+              ]),
             },
           ]}
           options={{
@@ -47,14 +58,14 @@ const Chart = ({ coinId }: ChartProps) => {
                 show: false,
               },
             },
-            fill: {
-              type: "gradient",
-              gradient: {
-                gradientToColors: ["#0fbcf9"],
-                stops: [0, 100],
+            plotOptions: {
+              candlestick: {
+                colors: {
+                  upward: "#ac381b",
+                  downward: "#0e62bb",
+                },
               },
             },
-            colors: ["#0be881"],
             grid: {
               show: false,
             },
